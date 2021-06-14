@@ -2,6 +2,8 @@ import geopandas as gpd
 import matplotlib.pyplot as plt
 import pandas as pd
 from mapclassify import classify
+import seaborn as sns
+from my_modules.brazil_colors import create_ordered_colormap
 
 def mono_br_geoplot(ano: int, gdf: gpd.GeoDataFrame, df: pd.DataFrame, which_plot=0):
 
@@ -154,3 +156,83 @@ def double_br_geoplot(ano: int, gdf: gpd.GeoDataFrame, df: pd.DataFrame, save=Tr
         plt.close()
     else: 
         plt.show()
+
+
+
+def podium_swarmplot(imunizacao_ufs, estados_geo):
+    ####### Creating DataFrame to plot #############
+    anos = range(2017,2021)
+
+    ordered_states = list(imunizacao_ufs.uf.unique())
+    state_counter = {key:[0,0,0,0] for key in ordered_states}
+
+    for ano in anos:
+    #     print(ano)
+
+        data_to_plot = imunizacao_ufs.query("ano==@ano").groupby(by='uf', sort=False).mean().round(2).cobertura_vacinal
+        custom_classifier = classify(y=data_to_plot, scheme='quantiles', k=4)#, bins=bins*which_plot, k=4+which_plot)
+
+        counter = 0    
+
+        for each_class in custom_classifier.classes:
+    #         print (each_class, counter)
+            for state_position in each_class:
+                state = ordered_states[state_position]
+                state_counter[state][counter] += 1
+
+            counter += 1
+
+    # state_counter
+
+    state_counter_df = pd.DataFrame.from_dict(state_counter, orient = 'index', 
+                           columns=[txt + '_25%' for txt in ('1os', '2os', '3os', '4os')])
+    # state_counter_df
+
+    ##############
+
+    state_counter_df = pd.DataFrame.from_dict(state_counter, orient = 'index', 
+                           columns=[txt + '_25%' for txt in ('1os', '2os', '3os', '4os')])
+
+    state_counter_df = state_counter_df.melt(ignore_index=False).reset_index()
+
+    new_columns = dict(zip(state_counter_df.columns, ['uf', 'grupo', 'aparicoes']))
+    state_counter_df.rename(columns= new_columns, inplace=True)
+
+    lista = []
+    for aparicoes, grupo in zip(state_counter_df.aparicoes, state_counter_df.grupo):
+        lista.append((aparicoes * [grupo]))
+
+    state_counter_df['aparicoes_por_grupo'] = lista
+    state_counter_df = state_counter_df.explode(column='aparicoes_por_grupo').dropna()
+    state_counter_df = state_counter_df.reset_index(drop=True)
+
+    # state_counter_df
+
+
+
+    ############# SWARMPLOTTING #############
+
+    # with sns.axes_style('whitegrid'):
+    plt.draw()
+    order=state_counter_df.sort_values(by='aparicoes_por_grupo', kind='heapsort').uf.unique()
+    palette=create_ordered_colormap(order, output_as_list=True, replace_state_color_by_region=True)
+
+    plt.figure(figsize=(18,6))
+
+    ax = sns.swarmplot(data=state_counter_df, x='uf', y='aparicoes_por_grupo',
+                 size=7, orient='v', #hue='uf',
+                 palette=palette, order=order, marker="o"
+                 )
+
+    uf_siglas_dict = (estados_geo.sigla).to_dict()
+    siglas = [uf_siglas_dict[state.get_text()] for state in ax.get_xticklabels()]
+    ax.set_xticklabels(siglas)
+    ax.set_yticklabels(('', '', '', ''))
+
+    ax.set(xlabel= "Unidade Federativa", ylabel= 'Menor <----- Cobertura Vacinal -----> Maior')
+    plt.title("Nestes 4 anos, quais foram as UFs com maiores e menores coberturas vacinais em relação às outras?",
+              fontsize=16)
+    plt.suptitle('Pódio da Imunidade',fontsize=24, y=1)
+    ax.yaxis.grid(False) # horizontal lines
+    ax.xaxis.grid(True)
+    plt.show()
