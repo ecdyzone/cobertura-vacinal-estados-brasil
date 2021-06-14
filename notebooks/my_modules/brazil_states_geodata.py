@@ -74,6 +74,7 @@ def geo_colors_plot(estados_geo: gpd.GeoDataFrame, colors, ax):
 #    estados_geo['coords'] = [coords[0] for coords in merged['coords']]for idx, row in estados_geo.iterrows():
 #        plt.annotate(s=row['sigla'], xy=row['coords'],horizontalalignment='center')
 
+
 estados_geo = get_states_geodata()
 estados_regioes_ordem_oficial = estados_geo['nome_regiao'].to_dict()
 
