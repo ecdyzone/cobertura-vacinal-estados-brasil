@@ -4,7 +4,7 @@
 
 ![cloropleth-gif](./reports/figures/cloropleth_2017_2020.gif)
 
-Quer ir direto ao caderno principal da análise? Clique [aqui](Caderno 3).
+Quer ir direto ao caderno principal da análise? Clique [aqui](https://github.com/mumaral/cobertura-vacinal-estados-brasil/blob/main/notebooks/3_-_analise_e_conclusoes.ipynb).
 
 # Introdução
 
