@@ -58,7 +58,7 @@ def mono_br_geoplot(ano: int, gdf: gpd.GeoDataFrame, df: pd.DataFrame, which_plo
     i = 0
     axs = [ax]
     
-    axs[i].set_title(titles[which_plot])
+    axs[i].set_title(titles[which_plot], fontsize = 20)
     axs[i].axis('off')
 
     custom_classifier = classify(y=data_to_plot, scheme=schemes[which_plot], bins=bins*which_plot, k=4+which_plot)
@@ -129,7 +129,7 @@ def double_br_geoplot(ano: int, gdf: gpd.GeoDataFrame, df: pd.DataFrame, save=Tr
 #     for i in range(len(axs.flatten())):
     for i in range(len(axs.flatten())):
 
-        axs[i].set_title(titles[i])
+        axs[i].set_title(titles[i], fontsize=20)
         axs[i].axis('off')
 
         custom_classifier = classify(y=data_to_plot, scheme=schemes[i], bins=bins*i, k=4+i)
@@ -149,7 +149,7 @@ def double_br_geoplot(ano: int, gdf: gpd.GeoDataFrame, df: pd.DataFrame, save=Tr
                 text_to_write = text_to_write.replace('.00', '')
                 legend_texts[legend_number].set_text(text_to_write)
                 
-    fig.suptitle(f"{ano}")
+    fig.suptitle(f"{ano}", fontsize = 28)
     
     if save == True:
         fig.savefig("../reports/figures/cloropleths/geo" + str(ano) + "_to_gif.png", facecolor='w',transparent=None)
